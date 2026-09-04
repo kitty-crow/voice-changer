@@ -1,0 +1,172 @@
+.vc-section--modelSlotArea .vc-section-body {
+    padding-top: 16px;
+}
+
+.model-slot-area {
+    width: 100%;
+    min-width: 0;
+    display: block;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.model-slot-area .model-slot-panel {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.model-slot-area .model-slot-panel .model-slot-tiles-container {
+    min-width: 0;
+    max-height: min(34dvh, 330px);
+    padding: 2px 4px 2px 2px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.model-slot-tile-container,
+.model-slot-tile-container-selected {
+    width: auto;
+    min-width: 0;
+    height: 116px;
+    padding: 8px 7px 7px;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    justify-items: center;
+    border: 1px solid var(--vc-line);
+    border-radius: 14px;
+    background: var(--vc-surface-soft);
+    color: var(--vc-ink);
+    cursor: pointer;
+    box-shadow: none;
+    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+}
+
+.model-slot-tile-container:hover {
+    border-color: color-mix(in srgb, var(--vc-accent) 52%, var(--vc-line));
+    background: color-mix(in srgb, var(--vc-accent-soft) 42%, var(--vc-surface-soft));
+    transform: translateY(-2px);
+}
+
+.model-slot-tile-container-selected {
+    border-color: color-mix(in srgb, var(--vc-accent) 72%, var(--vc-line));
+    background: var(--vc-accent-soft);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vc-accent) 28%, transparent), 0 8px 20px color-mix(in srgb, var(--vc-accent) 12%, transparent);
+}
+
+.model-slot-tile-icon-div {
+    width: 70px;
+    height: 70px;
+    min-width: 0;
+    padding: 0;
+    position: relative;
+    align-self: center;
+}
+
+.model-slot-tile-icon {
+    width: 70px;
+    height: 70px;
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in srgb, var(--vc-line) 84%, transparent);
+    border-radius: 12px;
+    background: var(--vc-surface-raised);
+    object-fit: contain;
+}
+
+.model-slot-tile-icon-no-entry {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 1px dashed var(--vc-line-strong);
+    border-radius: 12px;
+    color: var(--vc-muted);
+    font-size: 0.66rem;
+}
+
+.model-slot-tile-vctype {
+    max-width: 64px;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    padding: 2px 5px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--vc-accent-2) 28%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--vc-accent-2-soft) 92%, transparent);
+    color: var(--vc-accent-2);
+    font-size: 0.55rem;
+    font-weight: 850;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.model-slot-tile-dscription {
+    width: 100%;
+    min-width: 0;
+    padding: 4px 2px 0;
+    overflow: hidden;
+    color: var(--vc-ink);
+    font-size: 0.71rem;
+    font-weight: 760;
+    line-height: 1.1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.model-slot-area .model-slot-panel .model-slot-buttons {
+    width: 48px;
+    min-width: 48px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-buttons {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.model-slot-area .model-slot-panel .model-slot-buttons .model-slot-button,
+.model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-button,
+.model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-button-active {
+    width: 48px;
+    min-height: 38px;
+    padding: 6px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--vc-line);
+    border-radius: 11px;
+    background: var(--vc-surface-raised);
+    color: var(--vc-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: border-color 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.model-slot-area .model-slot-panel .model-slot-buttons .model-slot-button:hover,
+.model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-button:hover {
+    border-color: color-mix(in srgb, var(--vc-accent) 52%, var(--vc-line));
+    background: var(--vc-accent-soft);
+    color: var(--vc-accent);
+}
+
+.model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-button-active {
+    border-color: color-mix(in srgb, var(--vc-accent) 60%, var(--vc-line));
+    background: var(--vc-accent-soft);
+    color: var(--vc-accent);
+}
