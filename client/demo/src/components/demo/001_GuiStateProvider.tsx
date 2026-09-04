@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { ReactNode } from "react";
-import { useAppRoot } from "../../001_provider/001_AppRootProvider";
+import { useAppState } from "../../001_provider/001_AppStateProvider";
 import { StateControlCheckbox, useStateControlCheckbox } from "../../hooks/useStateControlCheckbox";
 
 export const OpenServerControlCheckbox = "open-server-control-checkbox";
@@ -24,6 +24,27 @@ export const OpenEnablePassThroughDialogCheckbox = "open-enable-pass-through-dia
 
 export const OpenTextInputDialogCheckbox = "open-text-input-dialog-checkbox";
 export const OpenShowLicenseDialogCheckbox = "open-show-license-dialog-checkbox";
+
+const AUDIO_INPUT_STORAGE_KEY = "kittycrow.voice-changer.audio-input.v1";
+const AUDIO_OUTPUT_STORAGE_KEY = "kittycrow.voice-changer.audio-output.v1";
+const AUDIO_MONITOR_STORAGE_KEY = "kittycrow.voice-changer.audio-monitor.v1";
+
+const readStoredString = (key: string, fallback: string) => {
+    try {
+        return window.localStorage.getItem(key) || fallback;
+    } catch (e) {
+        console.warn(`[voice-changer] failed to read ${key}`, e);
+        return fallback;
+    }
+};
+
+const writeStoredString = (key: string, value: string) => {
+    try {
+        window.localStorage.setItem(key, value);
+    } catch (e) {
+        console.warn(`[voice-changer] failed to persist ${key}`, e);
+    }
+};
 
 type Props = {
     children: ReactNode;
@@ -99,18 +120,24 @@ type TextInputResolveType = {
 };
 
 export const GuiStateProvider = ({ children }: Props) => {
-    const { appGuiSettingState } = useAppRoot();
+    const { initialized, setting, setVoiceChangerClientSetting } = useAppState();
     const [isConverting, setIsConverting] = useState<boolean>(false);
     const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
     const [modelSlotNum, setModelSlotNum] = useState<number>(0);
 
     const [showPyTorchModelUpload, setShowPyTorchModelUpload] = useState<boolean>(false);
 
+    const storedInputRef = useRef<string>(readStoredString(AUDIO_INPUT_STORAGE_KEY, "none"));
+    const storedOutputRef = useRef<string>(readStoredString(AUDIO_OUTPUT_STORAGE_KEY, "none"));
+    const storedMonitorRef = useRef<string>(readStoredString(AUDIO_MONITOR_STORAGE_KEY, "none"));
+    const inputPreferenceHydratedRef = useRef<boolean>(false);
+    const outputPreferenceHydratedRef = useRef<boolean>(false);
+
     const [inputAudioDeviceInfo, setInputAudioDeviceInfo] = useState<MediaDeviceInfo[]>([]);
     const [outputAudioDeviceInfo, setOutputAudioDeviceInfo] = useState<MediaDeviceInfo[]>([]);
-    const [audioInputForGUI, setAudioInputForGUI] = useState<string>("none");
-    const [audioOutputForGUI, setAudioOutputForGUI] = useState<string>("none");
-    const [audioMonitorForGUI, setAudioMonitorForGUI] = useState<string>("none");
+    const [audioInputForGUI, setAudioInputForGUI] = useState<string>(storedInputRef.current);
+    const [audioOutputForGUI, setAudioOutputForGUI] = useState<string>(storedOutputRef.current);
+    const [audioMonitorForGUI, setAudioMonitorForGUI] = useState<string>(storedMonitorRef.current);
     const [fileInputEchoback, setFileInputEchoback] = useState<boolean>(false); //最初のmuteが有効になるように。undefined <-- ??? falseしておけばよさそう。undefinedだとwarningがでる。
     const [shareScreenEnabled, setShareScreenEnabled] = useState<boolean>(false);
     const [audioOutputForAnalyzer, setAudioOutputForAnalyzer] = useState<string>("default");
@@ -162,13 +189,6 @@ export const GuiStateProvider = ({ children }: Props) => {
             label: "none",
             toJSON: () => {},
         });
-        // audioOutputs.push({
-        //     deviceId: "record",
-        //     groupId: "record",
-        //     kind: "audiooutput",
-        //     label: "record",
-        //     toJSON: () => { }
-        // })
         return [audioInputs, audioOutputs];
     };
     useEffect(() => {
@@ -179,6 +199,66 @@ export const GuiStateProvider = ({ children }: Props) => {
         };
         audioInitialize();
     }, []);
+
+    // LocalStorage is the durable preference source for browser devices. The
+    // historical client also uses IndexedDB internally, but these preferences
+    // should survive cleanly and synchronously across ordinary page sessions.
+    useEffect(() => {
+        if (!initialized || inputAudioDeviceInfo.length === 0 || inputPreferenceHydratedRef.current) {
+            return;
+        }
+
+        const stored = storedInputRef.current;
+        const storedIsAvailable = inputAudioDeviceInfo.some((device) => device.deviceId === stored);
+        const clientInput = typeof setting.voiceChangerClientSetting.audioInput === "string" ? setting.voiceChangerClientSetting.audioInput : "none";
+        const clientInputIsAvailable = inputAudioDeviceInfo.some((device) => device.deviceId === clientInput);
+        const preferred = storedIsAvailable ? stored : clientInputIsAvailable ? clientInput : "none";
+
+        storedInputRef.current = preferred;
+        setAudioInputForGUI(preferred);
+        writeStoredString(AUDIO_INPUT_STORAGE_KEY, preferred);
+
+        if (preferred !== clientInput && preferred !== "file" && preferred !== "screen") {
+            setVoiceChangerClientSetting({ ...setting.voiceChangerClientSetting, audioInput: preferred });
+        }
+
+        inputPreferenceHydratedRef.current = true;
+    }, [initialized, inputAudioDeviceInfo, setting.voiceChangerClientSetting.audioInput]);
+
+    useEffect(() => {
+        if (outputAudioDeviceInfo.length === 0 || outputPreferenceHydratedRef.current) {
+            return;
+        }
+
+        const output = outputAudioDeviceInfo.some((device) => device.deviceId === storedOutputRef.current) ? storedOutputRef.current : "none";
+        const monitor = outputAudioDeviceInfo.some((device) => device.deviceId === storedMonitorRef.current) ? storedMonitorRef.current : "none";
+
+        storedOutputRef.current = output;
+        storedMonitorRef.current = monitor;
+        setAudioOutputForGUI(output);
+        setAudioMonitorForGUI(monitor);
+        writeStoredString(AUDIO_OUTPUT_STORAGE_KEY, output);
+        writeStoredString(AUDIO_MONITOR_STORAGE_KEY, monitor);
+        outputPreferenceHydratedRef.current = true;
+    }, [outputAudioDeviceInfo]);
+
+    useEffect(() => {
+        if (!inputPreferenceHydratedRef.current) return;
+        storedInputRef.current = audioInputForGUI;
+        writeStoredString(AUDIO_INPUT_STORAGE_KEY, audioInputForGUI);
+    }, [audioInputForGUI]);
+
+    useEffect(() => {
+        if (!outputPreferenceHydratedRef.current) return;
+        storedOutputRef.current = audioOutputForGUI;
+        writeStoredString(AUDIO_OUTPUT_STORAGE_KEY, audioOutputForGUI);
+    }, [audioOutputForGUI]);
+
+    useEffect(() => {
+        if (!outputPreferenceHydratedRef.current) return;
+        storedMonitorRef.current = audioMonitorForGUI;
+        writeStoredString(AUDIO_MONITOR_STORAGE_KEY, audioMonitorForGUI);
+    }, [audioMonitorForGUI]);
 
     // (1) Controller Switch
     const openServerControlCheckbox = useStateControlCheckbox(OpenServerControlCheckbox);
@@ -213,7 +293,6 @@ export const GuiStateProvider = ({ children }: Props) => {
         openAdvancedSettingCheckbox.updateState(false);
 
         showWaitingCheckbox.updateState(false);
-
         showStartingNoticeCheckbox.updateState(false);
         showModelSlotManagerCheckbox.updateState(false);
         showMergeLabCheckbox.updateState(false);
@@ -225,22 +304,6 @@ export const GuiStateProvider = ({ children }: Props) => {
         showTextInputCheckbox.updateState(false);
         showLicenseCheckbox.updateState(false);
     }, []);
-
-    useEffect(() => {
-        const show = () => {
-            // const lang = window.navigator.language
-            // const edition = appGuiSettingState.edition
-            // console.log("appGuiSettingState.edition", appGuiSettingState.edition, lang)
-            // if ((edition == "onnxdirectML-cuda" || edition == "") && lang == "ja") {
-            //     return
-            // }
-
-            document.getElementById("dialog")?.classList.add("dialog-container-show");
-            showStartingNoticeCheckbox.updateState(true);
-            document.getElementById("dialog2")?.classList.add("dialog-container-show");
-        };
-        setTimeout(show);
-    }, [appGuiSettingState.edition]);
 
     const providerValue = {
         stateControls: {
