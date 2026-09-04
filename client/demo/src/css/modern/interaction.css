@@ -1,0 +1,34 @@
+/* Interaction overrides live after the legacy stylesheet and the component layout
+   rules so browser-native controls keep a real hit target and never inherit a
+   collapsed inline box from the historical UI. */
+
+.character-area-slider-control-slider,
+.config-sub-area-slider-control-slider {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.character-area-slider-control-slider input[type="range"],
+.config-sub-area-slider-control-slider input[type="range"],
+input.character-area-slider-control-slider[type="range"],
+input.config-sub-area-slider-control-slider[type="range"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: pan-y;
+    accent-color: var(--vc-accent);
+}
+
+.character-area-slider-control-slider input[type="range"]:focus-visible,
+.config-sub-area-slider-control-slider input[type="range"]:focus-visible,
+input.character-area-slider-control-slider[type="range"]:focus-visible,
+input.config-sub-area-slider-control-slider[type="range"]:focus-visible {
+    outline: 2px solid var(--vc-accent);
+    outline-offset: 3px;
+}
