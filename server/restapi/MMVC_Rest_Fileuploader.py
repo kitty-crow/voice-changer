@@ -158,7 +158,7 @@ class MMVC_Rest_Fileuploader:
         self,
         slot: int = Form(...),
         isHalf: bool = Form(...),
-        params: str = "{}",
+        params: str = Form(...),
     ):
         try:
             paramDict = json.loads(params)
