@@ -121,11 +121,12 @@ def localServer(logLevel: str = "critical"):
             f"{os.path.basename(__file__)[:-3]}:app_socketio",
             host="0.0.0.0",
             port=int(PORT),
-            reload=False if hasattr(sys, "_MEIPASS") else True,
+            reload=False,
             log_level=logLevel,
         )
     except Exception as e:
-        logger.error(f"[Voice Changer] Web Server Launch Exception, {e}")
+        logger.exception(f"[Voice Changer] Web Server Launch Exception, {e}")
+        raise
 
 
 if __name__ == "MMVCServerSIO":
@@ -241,13 +242,14 @@ if __name__ == "__main__":
                 f"{os.path.basename(__file__)[:-3]}:app_socketio",
                 host="0.0.0.0",
                 port=int(PORT),
-                reload=False if hasattr(sys, "_MEIPASS") else True,
+                reload=False,
                 ssl_keyfile=key_path,
                 ssl_certfile=cert_path,
                 log_level=args.logLevel,
             )
         except Exception as e:
-            logger.error(f"[Voice Changer] Web Server(https) Launch Exception, {e}")
+            logger.exception(f"[Voice Changer] Web Server(https) Launch Exception, {e}")
+            raise
 
     else:
         p = mp.Process(name="p", target=localServer, args=(args.logLevel,))
