@@ -1,12 +1,11 @@
-import { useState, useMemo } from "react"
-import { VoiceChangerServerSetting, ServerInfo, ServerSettingKey, OnnxExporterInfo, MergeModelRequest, VoiceChangerType, DefaultServerSetting } from "../const"
+import { useMemo, useRef, useState } from "react"
+import { VoiceChangerServerSetting, ServerInfo, ServerSettingKey, OnnxExporterInfo, MergeModelRequest, VoiceChangerType, DefaultServerSetting, F0Detector } from "../const"
 import { VoiceChangerClient } from "../VoiceChangerClient"
 
 export const ModelAssetName = {
     iconFile: "iconFile"
 } as const
 export type ModelAssetName = typeof ModelAssetName[keyof typeof ModelAssetName]
-
 
 export const ModelFileKind = {
     "mmvcv13Config": "mmvcv13Config",
@@ -83,8 +82,112 @@ export type ServerSettingState = {
     uploadAssets: (slot: number, name: ModelAssetName, file: File) => Promise<void>
 }
 
+const SERVER_PREFERENCES_STORAGE_KEY = "kittycrow.voice-changer.server-preferences.v1"
+
+type ServerPreferences = {
+    modelSlotIndex?: number
+    f0Detector?: F0Detector
+    gpu?: number
+    serverInputDeviceId?: number
+    serverOutputDeviceId?: number
+    serverMonitorDeviceId?: number
+}
+
+const readServerPreferences = (): ServerPreferences => {
+    if (typeof window === "undefined") return {}
+    try {
+        const raw = window.localStorage.getItem(SERVER_PREFERENCES_STORAGE_KEY)
+        if (!raw) return {}
+        return JSON.parse(raw) as ServerPreferences
+    } catch (e) {
+        console.warn("[voice-changer] failed to read local server preferences", e)
+        return {}
+    }
+}
+
+const writeServerPreferences = (setting: ServerInfo) => {
+    if (typeof window === "undefined") return
+    try {
+        const normalisedModelSlotIndex = setting.modelSlotIndex >= 0 ? setting.modelSlotIndex % 1000 : setting.modelSlotIndex
+        const prefs: ServerPreferences = {
+            modelSlotIndex: normalisedModelSlotIndex,
+            f0Detector: setting.f0Detector,
+            gpu: setting.gpu,
+            serverInputDeviceId: setting.serverInputDeviceId,
+            serverOutputDeviceId: setting.serverOutputDeviceId,
+            serverMonitorDeviceId: setting.serverMonitorDeviceId,
+        }
+        window.localStorage.setItem(SERVER_PREFERENCES_STORAGE_KEY, JSON.stringify(prefs))
+    } catch (e) {
+        console.warn("[voice-changer] failed to persist local server preferences", e)
+    }
+}
+
+const restoreServerPreferences = (setting: ServerInfo): ServerInfo => {
+    const prefs = readServerPreferences()
+    const restored = { ...setting }
+
+    if (
+        typeof prefs.modelSlotIndex === "number" &&
+        prefs.modelSlotIndex >= 0 &&
+        setting.modelSlots?.some((slot) => slot.slotIndex === prefs.modelSlotIndex && Boolean(slot.modelFile))
+    ) {
+        restored.modelSlotIndex = prefs.modelSlotIndex
+    }
+
+    if (typeof prefs.f0Detector === "string" && prefs.f0Detector.length > 0) {
+        restored.f0Detector = prefs.f0Detector
+    }
+
+    if (
+        typeof prefs.gpu === "number" &&
+        (prefs.gpu === -1 || setting.gpus?.some((gpu) => gpu.id === prefs.gpu))
+    ) {
+        restored.gpu = prefs.gpu
+    }
+
+    if (
+        typeof prefs.serverInputDeviceId === "number" &&
+        (prefs.serverInputDeviceId === -1 || setting.serverAudioInputDevices?.some((device) => device.index === prefs.serverInputDeviceId))
+    ) {
+        restored.serverInputDeviceId = prefs.serverInputDeviceId
+    }
+
+    if (
+        typeof prefs.serverOutputDeviceId === "number" &&
+        (prefs.serverOutputDeviceId === -1 || setting.serverAudioOutputDevices?.some((device) => device.index === prefs.serverOutputDeviceId))
+    ) {
+        restored.serverOutputDeviceId = prefs.serverOutputDeviceId
+    }
+
+    if (
+        typeof prefs.serverMonitorDeviceId === "number" &&
+        (prefs.serverMonitorDeviceId === -1 || setting.serverAudioOutputDevices?.some((device) => device.index === prefs.serverMonitorDeviceId))
+    ) {
+        restored.serverMonitorDeviceId = prefs.serverMonitorDeviceId
+    }
+
+    return restored
+}
+
+const changedServerSettingKeys = (current: ServerInfo, next: ServerInfo) => {
+    return Object.values(ServerSettingKey).filter((key) => {
+        const k = key as keyof VoiceChangerServerSetting
+        return current[k] != next[k]
+    }) as (keyof VoiceChangerServerSetting)[]
+}
+
 export const useServerSetting = (props: UseServerSettingProps): ServerSettingState => {
     const [serverSetting, setServerSetting] = useState<ServerInfo>(DefaultServerSetting)
+    const serverSettingRef = useRef<ServerInfo>(DefaultServerSetting)
+    const updateSerialRef = useRef<Promise<void>>(Promise.resolve())
+    const updateVersionRef = useRef<number>(0)
+    const preferencesRestoredRef = useRef<boolean>(false)
+
+    const setServerSettingState = (setting: ServerInfo) => {
+        serverSettingRef.current = setting
+        setServerSetting(setting)
+    }
 
     //////////////
     // 設定
@@ -92,18 +195,53 @@ export const useServerSetting = (props: UseServerSettingProps): ServerSettingSta
     const updateServerSettings = useMemo(() => {
         return async (setting: ServerInfo) => {
             if (!props.voiceChangerClient) return
-            for (let i = 0; i < Object.values(ServerSettingKey).length; i++) {
-                const k = Object.values(ServerSettingKey)[i] as keyof VoiceChangerServerSetting
-                const cur_v = serverSetting[k]
-                const new_v = setting[k]
 
-                if (cur_v != new_v) {
-                    const res = await props.voiceChangerClient.updateServerSettings(k, "" + new_v)
-                    setServerSetting(res)
+            const current = serverSettingRef.current
+            const changedKeys = changedServerSettingKeys(current, setting)
+            if (changedKeys.length === 0) return
+
+            // Controlled sliders/selects must react immediately. The historical
+            // implementation waited for a full HTTP round trip before changing
+            // React state, which made range inputs appear frozen and allowed
+            // stale responses to snap controls backwards while dragging.
+            const version = ++updateVersionRef.current
+            setServerSettingState(setting)
+            writeServerPreferences(setting)
+
+            const operation = async () => {
+                let response: ServerInfo | null = null
+                try {
+                    for (const k of changedKeys) {
+                        response = await props.voiceChangerClient!.updateServerSettings(k, "" + setting[k])
+                    }
+
+                    // Updates are serialised, but the user may already have made
+                    // a newer optimistic change while this request was in flight.
+                    // Only the newest operation is allowed to reconcile the UI.
+                    if (response && version === updateVersionRef.current) {
+                        setServerSettingState(response)
+                        writeServerPreferences(response)
+                    }
+                } catch (e) {
+                    console.error("[voice-changer] failed to update server setting", e)
+                    if (version === updateVersionRef.current) {
+                        try {
+                            const authoritative = await props.voiceChangerClient!.getServerSettings()
+                            setServerSettingState(authoritative)
+                            writeServerPreferences(authoritative)
+                        } catch (reloadError) {
+                            console.error("[voice-changer] failed to recover server settings", reloadError)
+                        }
+                    }
+                    throw e
                 }
             }
+
+            const queued = updateSerialRef.current.then(operation, operation)
+            updateSerialRef.current = queued.catch(() => undefined)
+            await queued
         }
-    }, [props.voiceChangerClient, serverSetting])
+    }, [props.voiceChangerClient])
 
 
 
@@ -182,12 +320,26 @@ export const useServerSetting = (props: UseServerSettingProps): ServerSettingSta
 
     const reloadServerInfo = useMemo(() => {
         return async () => {
-
             if (!props.voiceChangerClient) return
+
             const res = await props.voiceChangerClient.getServerSettings()
-            setServerSetting(res)
+
+            if (!preferencesRestoredRef.current) {
+                preferencesRestoredRef.current = true
+                const restored = restoreServerPreferences(res)
+                const changedKeys = changedServerSettingKeys(res, restored)
+
+                if (changedKeys.length > 0) {
+                    setServerSettingState(res)
+                    await updateServerSettings(restored)
+                    return
+                }
+            }
+
+            setServerSettingState(res)
+            writeServerPreferences(res)
         }
-    }, [props.voiceChangerClient])
+    }, [props.voiceChangerClient, updateServerSettings])
 
 
     const getOnnx = async () => {
@@ -196,18 +348,21 @@ export const useServerSetting = (props: UseServerSettingProps): ServerSettingSta
 
     const mergeModel = async (request: MergeModelRequest) => {
         const serverInfo = await props.voiceChangerClient!.mergeModel(request)
-        setServerSetting(serverInfo)
+        setServerSettingState(serverInfo)
+        writeServerPreferences(serverInfo)
         return serverInfo
     }
 
     const updateModelDefault = async () => {
         const serverInfo = await props.voiceChangerClient!.updateModelDefault()
-        setServerSetting(serverInfo)
+        setServerSettingState(serverInfo)
+        writeServerPreferences(serverInfo)
         return serverInfo
     }
     const updateModelInfo = async (slot: number, key: string, val: string) => {
         const serverInfo = await props.voiceChangerClient!.updateModelInfo(slot, key, val)
-        setServerSetting(serverInfo)
+        setServerSettingState(serverInfo)
+        writeServerPreferences(serverInfo)
         return serverInfo
     }
 
