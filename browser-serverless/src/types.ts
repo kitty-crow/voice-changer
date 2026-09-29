@@ -1,4 +1,4 @@
-export type NeuralBackend = 'webgpu' | 'wasm';
+export type NeuralBackend = 'webgpu' | 'webgl' | 'wasm';
 export type MemoryTier = 'low' | 'medium' | 'high';
 export type ModelKind = 'contentvec' | 'rmvpe' | 'rvc';
 

@@ -1,13 +1,15 @@
 import * as ort from 'onnxruntime-web/webgpu';
-import type { ExecutionPlan, ModelKind, ModelMetadata } from './types.js';
+import type { ExecutionPlan, ModelKind, ModelMetadata, NeuralBackend } from './types.js';
 
 interface LoadedSession {
   readonly session: ort.InferenceSession;
   readonly metadata: ModelMetadata;
 }
 
-function executionProviders(plan: ExecutionPlan): ('webgpu' | 'wasm')[] {
-  return plan.neuralBackend === 'webgpu' ? ['webgpu', 'wasm'] : ['wasm'];
+function executionProviders(backend: NeuralBackend): ('webgpu' | 'webgl' | 'wasm')[] {
+  if (backend === 'webgpu') return ['webgpu', 'wasm'];
+  if (backend === 'webgl') return ['webgl', 'wasm'];
+  return ['wasm'];
 }
 
 export class BrowserOrtRuntime {
@@ -26,9 +28,9 @@ export class BrowserOrtRuntime {
     let session: ort.InferenceSession;
     let backend = this.plan.neuralBackend;
     try {
-      session = await ort.InferenceSession.create(bytes, { executionProviders: executionProviders(this.plan) });
+      session = await ort.InferenceSession.create(bytes, { executionProviders: executionProviders(this.plan.neuralBackend) });
     } catch (error: unknown) {
-      if (this.plan.neuralBackend !== 'webgpu') throw error;
+      if (this.plan.neuralBackend === 'wasm') throw error;
       session = await ort.InferenceSession.create(bytes, { executionProviders: ['wasm'] });
       backend = 'wasm';
     }
