@@ -12,8 +12,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: serverless-browser-${{ github.ref }}
@@ -50,11 +48,7 @@ jobs:
             exit 1
           fi
 
-      - name: Configure Pages
-        if: github.ref == 'refs/heads/local-rmvpe-onnx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
+      - name: Upload Pages build artifact
         if: github.ref == 'refs/heads/local-rmvpe-onnx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-pages-artifact@v3
         with:
@@ -62,12 +56,18 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/local-rmvpe-onnx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
       - name: Deploy static voice changer
         id: deployment
         uses: actions/deploy-pages@v4
