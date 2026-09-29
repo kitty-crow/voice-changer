@@ -1,4 +1,4 @@
-import * as ort from 'onnxruntime-web/webgpu';
+import * as ort from 'onnxruntime-web/all';
 import type { ExecutionPlan, ModelKind, ModelMetadata, NeuralBackend } from './types.js';
 
 interface LoadedSession {
