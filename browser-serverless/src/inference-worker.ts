@@ -223,7 +223,7 @@ async function runShared(init: ParsedSharedInit, activeGeneration: number): Prom
   const inputRing = new SharedFloatRingBuffer(init.inputRing.capacity, init.inputRing);
   const outputRing = new SharedFloatRingBuffer(init.outputRing.capacity, init.outputRing);
   const chunkSamples = Math.max(256, Math.round(init.inputSampleRate * init.settings.chunkMilliseconds / 1000));
-  let history = new Float32Array(0);
+  let history: Float32Array<ArrayBufferLike> = new Float32Array(0);
   const chunk = new Float32Array(chunkSamples);
   status(`Inference worker ready · shared buffers · ${backendSummary(loaded)} · ${chunkSamples} samples/chunk.`);
 
