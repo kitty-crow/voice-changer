@@ -6,7 +6,7 @@ interface LoadedSession {
   readonly metadata: ModelMetadata;
 }
 
-function executionProviders(plan: ExecutionPlan): readonly ('webgpu' | 'wasm')[] {
+function executionProviders(plan: ExecutionPlan): ('webgpu' | 'wasm')[] {
   return plan.neuralBackend === 'webgpu' ? ['webgpu', 'wasm'] : ['wasm'];
 }
 
@@ -21,12 +21,12 @@ export class BrowserOrtRuntime {
   }
 
   async load(kind: ModelKind, name: string, bytes: ArrayBuffer): Promise<ModelMetadata> {
-    this.sessions.get(kind)?.session.release();
-    const preferred = executionProviders(this.plan);
+    const existing = this.sessions.get(kind);
+    if (existing) void existing.session.release();
     let session: ort.InferenceSession;
     let backend = this.plan.neuralBackend;
     try {
-      session = await ort.InferenceSession.create(bytes, { executionProviders: [...preferred] });
+      session = await ort.InferenceSession.create(bytes, { executionProviders: executionProviders(this.plan) });
     } catch (error: unknown) {
       if (this.plan.neuralBackend !== 'webgpu') throw error;
       session = await ort.InferenceSession.create(bytes, { executionProviders: ['wasm'] });
@@ -52,8 +52,14 @@ export class BrowserOrtRuntime {
     return [...this.sessions.values()].map((value) => value.metadata);
   }
 
+  hasCompleteRvcStack(): boolean {
+    return this.sessions.has('contentvec') && this.sessions.has('rmvpe') && this.sessions.has('rvc');
+  }
+
   close(): void {
-    for (const loaded of this.sessions.values()) loaded.session.release();
+    for (const loaded of this.sessions.values()) void loaded.session.release();
     this.sessions.clear();
   }
 }
+
+export { ort };

@@ -18,7 +18,7 @@
 
     <section class="card">
       <h2>Local ONNX models</h2>
-      <p>Select the ONNX components already used by the local RVC stack. Files are loaded directly into this browser and can be cached locally.</p>
+      <p>Select the ONNX components used by the RVC stack. Files are loaded directly into this browser and cached in IndexedDB.</p>
       <label>ContentVec / HuBERT ONNX <input id="contentvec-model" type="file" accept=".onnx,application/octet-stream"></label>
       <label>RMVPE ONNX <input id="rmvpe-model" type="file" accept=".onnx,application/octet-stream"></label>
       <label>RVC ONNX <input id="rvc-model" type="file" accept=".onnx,application/octet-stream"></label>
@@ -30,10 +30,29 @@
     </section>
 
     <section class="card">
-      <h2>Audio path</h2>
-      <p>The first browser milestone runs microphone capture and playback through an AudioWorklet. Where cross-origin isolation is available it uses SharedArrayBuffer ring buffers, otherwise it falls back to message transport.</p>
+      <h2>Real-time conversion</h2>
+      <p>When all three models are loaded, microphone blocks are converted in a dedicated inference worker. The AudioWorklet only performs low-latency capture/playback and ring-buffer I/O.</p>
+      <div class="settings-grid">
+        <label>Pitch shift <input id="pitch-shift" type="number" min="-24" max="24" step="1" value="0"></label>
+        <label>Speaker ID <input id="speaker-id" type="number" min="0" step="1" value="0"></label>
+        <label>Model sample rate
+          <select id="model-sample-rate">
+            <option value="32000">32 kHz</option>
+            <option value="40000" selected>40 kHz</option>
+            <option value="48000">48 kHz</option>
+          </select>
+        </label>
+        <label>Inference chunk
+          <select id="chunk-ms">
+            <option value="160">160 ms</option>
+            <option value="240">240 ms</option>
+            <option value="320" selected>320 ms</option>
+            <option value="480">480 ms</option>
+          </select>
+        </label>
+      </div>
       <div class="buttons">
-        <button id="start-audio" type="button">Start local audio path</button>
+        <button id="start-audio" type="button">Start local audio</button>
         <button id="stop-audio" type="button" class="secondary" disabled>Stop</button>
       </div>
       <p id="audio-status" class="status">Audio stopped.</p>

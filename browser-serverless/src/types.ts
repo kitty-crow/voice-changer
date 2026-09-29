@@ -19,6 +19,8 @@ export interface HardwareProfile {
   readonly webgpu: WebGpuProfile;
   readonly webgl2: WebGlProfile;
   readonly wasm: boolean;
+  readonly wasmSimd: boolean;
+  readonly wasmThreads: boolean;
   readonly sharedMemory: boolean;
   readonly crossOriginIsolated: boolean;
   readonly audioWorklet: boolean;
@@ -78,4 +80,33 @@ export interface BenchmarkResponse {
   readonly elapsedMilliseconds: number;
   readonly checksum: number;
   readonly error: string | null;
+}
+
+export interface ConversionSettings {
+  readonly pitchShift: number;
+  readonly speakerId: number;
+  readonly modelSampleRate: number;
+  readonly chunkMilliseconds: number;
+}
+
+export interface InferenceWorkerInit {
+  readonly kind: 'init';
+  readonly plan: ExecutionPlan;
+  readonly inputRing: SharedRingDescriptor;
+  readonly outputRing: SharedRingDescriptor;
+  readonly inputSampleRate: number;
+  readonly settings: ConversionSettings;
+}
+
+export interface InferenceWorkerStop {
+  readonly kind: 'stop';
+}
+
+export type InferenceWorkerRequest = InferenceWorkerInit | InferenceWorkerStop;
+
+export interface InferenceWorkerStatus {
+  readonly kind: 'status';
+  readonly message: string;
+  readonly latencyMilliseconds: number | null;
+  readonly realtimeFactor: number | null;
 }
