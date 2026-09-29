@@ -44,32 +44,11 @@ function conversionSettings(): ConversionSettings {
   };
 }
 
-function benchmarkText(result: PreflightResult): string {
-  return result.benchmarks
-    .map((benchmark) => `${benchmark.backend}: ${benchmark.passed ? `${benchmark.milliseconds.toFixed(1)} ms` : 'unavailable'} (${benchmark.detail})`)
-    .join(' · ');
-}
-
 function populateFooter(result: PreflightResult): void {
-  const profile = result.profile;
-  const gpuResources: string[] = [];
-  if (profile.webgpu.available) gpuResources.push(`WebGPU ${profile.webgpu.description ?? 'adapter'}`);
-  if (profile.webgl2.available) gpuResources.push(`WebGL2 ${profile.webgl2.renderer ?? 'adapter'}`);
-  if (gpuResources.length === 0) gpuResources.push('no browser GPU');
-  const memory = profile.deviceMemoryGiB !== null
-    ? `~${profile.deviceMemoryGiB} GiB device memory`
-    : profile.heapLimitMiB !== null
-      ? `${profile.heapLimitMiB} MiB JS heap limit`
-      : 'memory estimate unavailable';
-
   resourceFooter.replaceChildren();
-  const selected = document.createElement('strong');
-  selected.textContent = `Selected automatically: ${result.plan.neuralBackend.toUpperCase()} · ${result.plan.workerCount} CPU worker(s)`;
-  const resources = document.createElement('span');
-  resources.textContent = `${gpuResources.join(' · ')} · ${profile.logicalCores} logical CPU cores · ${memory} · ${profile.memoryTier} memory · WASM ${profile.wasmSimd ? 'SIMD' : 'scalar'}${profile.wasmThreads ? '+threads' : ''} · ${result.plan.sharedAudioBuffers ? 'SharedArrayBuffer audio' : 'message audio'}`;
-  const benchmarks = document.createElement('span');
-  benchmarks.textContent = `Pre-flight: ${benchmarkText(result)}`;
-  resourceFooter.append(selected, resources, benchmarks);
+  const summary = document.createElement('strong');
+  summary.textContent = `${result.plan.neuralBackend.toUpperCase()} · ${result.plan.workerCount} worker${result.plan.workerCount === 1 ? '' : 's'} · ${result.plan.sharedAudioBuffers ? 'shared audio' : 'audio'}`;
+  resourceFooter.append(summary);
 }
 
 async function registerIsolationWorker(): Promise<void> {
@@ -89,7 +68,7 @@ async function registerIsolationWorker(): Promise<void> {
 }
 
 function metadataText(metadata: readonly ModelMetadata[], validation: readonly string[] = []): string {
-  if (metadata.length === 0) return 'No browser models loaded.';
+  if (metadata.length === 0) return 'No models loaded.';
   const modelText = metadata.map((model) => [
     `${model.kind}: ${model.name}`,
     `  ${(model.sizeBytes / 1048576).toFixed(1)} MiB · ${model.backend.toUpperCase()}`,
@@ -117,7 +96,7 @@ async function loadSelectedModels(): Promise<void> {
     for (const kind of ['contentvec', 'rmvpe', 'rvc'] as const) {
       const model = await modelBytes(kind);
       if (!model) continue;
-      modelStatus.textContent = `Loading ${kind} locally…`;
+      modelStatus.textContent = `Loading ${kind}…`;
       loaded.push(await nextRuntime.load(kind, model.name, model.bytes));
     }
     const validation = nextRuntime.hasCompleteRvcStack() ? nextRuntime.validateRvcStack() : [];
@@ -141,7 +120,7 @@ clearCache.addEventListener('click', () => {
     .then(() => {
       runtime?.close();
       runtime = preflight ? new BrowserOrtRuntime(preflight.plan) : null;
-      modelStatus.textContent = 'Local model cache cleared.';
+      modelStatus.textContent = 'Model cache cleared.';
     })
     .catch((error: unknown) => { modelStatus.textContent = error instanceof Error ? error.message : String(error); })
     .finally(() => { clearCache.disabled = false; });
@@ -168,7 +147,7 @@ startAudio.addEventListener('click', () => {
   audioPath = new LocalAudioPath(result.plan, conversionSettings());
   void audioPath.start(convert, (workerStatus) => { audioStatus.textContent = workerStatus.message; })
     .then((detail) => {
-      audioStatus.textContent = `${convert ? 'Local conversion requested.' : 'Models incomplete, using local pass-through.'} ${detail}`;
+      audioStatus.textContent = `${convert ? 'Conversion started.' : 'Models incomplete, using pass-through.'} ${detail}`;
       stopAudio.disabled = false;
     })
     .catch((error: unknown) => {
@@ -189,11 +168,11 @@ stopAudio.addEventListener('click', () => {
 
 void (async (): Promise<void> => {
   await registerIsolationWorker();
-  preflightStatus.textContent = 'Benchmarking browser hardware automatically…';
+  preflightStatus.textContent = 'Checking hardware…';
   try {
     preflight = await runPreflight();
     populateFooter(preflight);
-    preflightStatus.textContent = `Ready. Neural inference will use ${preflight.plan.neuralBackend.toUpperCase()} automatically.`;
+    preflightStatus.textContent = `Ready · ${preflight.plan.neuralBackend.toUpperCase()}`;
     runtime = new BrowserOrtRuntime(preflight.plan);
   } catch (error: unknown) {
     preflightStatus.textContent = error instanceof Error ? error.message : String(error);
