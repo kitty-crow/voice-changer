@@ -1,4 +1,8 @@
-import type { SharedRingDescriptor } from './types.js';
+interface SharedRingDescriptor {
+  readonly header: SharedArrayBuffer;
+  readonly samples: SharedArrayBuffer;
+  readonly capacity: number;
+}
 
 interface ProcessorOptions {
   readonly inputRing?: SharedRingDescriptor;
@@ -11,7 +15,11 @@ interface WorkletOptionsLike {
 }
 
 function validDescriptor(value: SharedRingDescriptor | undefined): value is SharedRingDescriptor {
-  return value !== undefined && value.header instanceof SharedArrayBuffer && value.samples instanceof SharedArrayBuffer && Number.isInteger(value.capacity) && value.capacity > 1;
+  return value !== undefined
+    && value.header instanceof SharedArrayBuffer
+    && value.samples instanceof SharedArrayBuffer
+    && Number.isInteger(value.capacity)
+    && value.capacity > 1;
 }
 
 class RingView {
@@ -79,12 +87,14 @@ class LocalVoiceWorklet extends AudioWorkletProcessor {
     if (!output) return true;
     output.fill(0);
     if (!input) return true;
+
     if (this.inputRing && this.outputRing) {
       this.inputRing.write(input);
       const converted = this.outputRing.read(output);
       if (converted === 0 && this.dryWhenEmpty) output.set(input.subarray(0, output.length));
       return true;
     }
+
     const copy = input.slice();
     this.port.postMessage(copy, [copy.buffer]);
     const queued = this.queuedOutput.shift();

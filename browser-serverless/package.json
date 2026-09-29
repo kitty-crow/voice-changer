@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worklet.json --noEmit",
     "test": "bun test tests/*.test.ts",
     "test:strict": "bun run test && bun run typecheck",
     "build:bundle": "bun build src/app.ts src/benchmark-worker.ts src/audio-worklet.ts src/inference-worker.ts src/coi-serviceworker.ts --outdir dist --target browser --format esm --splitting --minify",

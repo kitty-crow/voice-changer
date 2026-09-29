@@ -16,8 +16,8 @@ async function sourceFiles(directory: string): Promise<string[]> {
   return files;
 }
 
-test('strict compiler options cannot be loosened', async () => {
-  const raw: unknown = JSON.parse(await readFile(join(root, 'tsconfig.json'), 'utf8'));
+async function assertStrictConfig(fileName: string): Promise<void> {
+  const raw: unknown = JSON.parse(await readFile(join(root, fileName), 'utf8'));
   expect(typeof raw).toBe('object');
   expect(raw).not.toBeNull();
   const config = raw as Record<string, unknown>;
@@ -35,6 +35,11 @@ test('strict compiler options cannot be loosened', async () => {
     'noPropertyAccessFromIndexSignature',
   ]) expect(options[key]).toBe(true);
   expect(options['skipLibCheck']).toBe(false);
+}
+
+test('every browser TypeScript environment remains strict', async () => {
+  await assertStrictConfig('tsconfig.json');
+  await assertStrictConfig('tsconfig.worklet.json');
 });
 
 test('browser TypeScript contains no explicit any or suppression comments', async () => {
