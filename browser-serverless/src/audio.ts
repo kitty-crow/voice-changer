@@ -46,6 +46,7 @@ export class LocalAudioPath {
         });
         const init: InferenceWorkerInit = {
           kind: 'init',
+          transport: 'shared',
           plan: this.plan,
           inputRing: inputRing.descriptor,
           outputRing: outputRing.descriptor,
