@@ -1,0 +1,24 @@
+{
+  "name": "voice-changer-serverless-browser",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "bun test tests/*.test.ts",
+    "test:strict": "bun run test && bun run typecheck",
+    "build:bundle": "bun build src/app.ts src/benchmark-worker.ts src/audio-worklet.ts src/coi-serviceworker.ts --outdir dist --target browser --format esm --splitting --minify",
+    "build:assets": "mkdir -p dist/ort && cp index.html styles.css dist/ && cp node_modules/onnxruntime-web/dist/*.wasm dist/ort/",
+    "build": "rm -rf dist && bun run test:strict && bun run build:bundle && bun run build:assets",
+    "check:dist": "test -f dist/app.js && test -f dist/audio-worklet.js && test -f dist/coi-serviceworker.js && ! find dist -type f -name '*.ts' -print -quit | grep -q ."
+  },
+  "dependencies": {
+    "onnxruntime-web": "^1.23.2"
+  },
+  "devDependencies": {
+    "@types/audioworklet": "^0.0.50",
+    "@types/bun": "^1.3.0",
+    "@webgpu/types": "^0.1.74",
+    "typescript": "^5.9.3"
+  }
+}

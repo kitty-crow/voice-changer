@@ -1,0 +1,73 @@
+name: Serverless browser runtime
+
+on:
+  push:
+    branches:
+      - local-rmvpe-onnx
+      - feat/serverless-browser-runtime
+  pull_request:
+    branches:
+      - local-rmvpe-onnx
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: serverless-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install browser dependencies
+        working-directory: browser-serverless
+        run: bun install
+
+      - name: Enforce strict TypeScript and no loose types
+        working-directory: browser-serverless
+        run: bun run test:strict
+
+      - name: Build static serverless browser runtime
+        working-directory: browser-serverless
+        run: bun run build:bundle && bun run build:assets && bun run check:dist
+
+      - name: Prove no browser JavaScript is committed as source
+        run: |
+          if find browser-serverless/src -type f \( -name '*.js' -o -name '*.mjs' -o -name '*.cjs' \) -print -quit | grep -q .; then
+            echo 'Handwritten JavaScript found in browser source.' >&2
+            exit 1
+          fi
+
+      - name: Configure Pages
+        if: github.ref == 'refs/heads/local-rmvpe-onnx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/local-rmvpe-onnx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: browser-serverless/dist
+
+  deploy:
+    if: github.ref == 'refs/heads/local-rmvpe-onnx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy static voice changer
+        id: deployment
+        uses: actions/deploy-pages@v4

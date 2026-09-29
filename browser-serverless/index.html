@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Serverless browser-native RVC voice changer runtime">
+  <title>Voice Changer · Local Browser Runtime</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">100% local inference experiment</p>
+      <h1>Voice Changer</h1>
+      <p>Audio and model execution stay on this device. No inference server is contacted.</p>
+      <p id="preflight-status" class="status">Running hardware pre-flight…</p>
+    </header>
+
+    <section class="card">
+      <h2>Local ONNX models</h2>
+      <p>Select the ONNX components already used by the local RVC stack. Files are loaded directly into this browser and can be cached locally.</p>
+      <label>ContentVec / HuBERT ONNX <input id="contentvec-model" type="file" accept=".onnx,application/octet-stream"></label>
+      <label>RMVPE ONNX <input id="rmvpe-model" type="file" accept=".onnx,application/octet-stream"></label>
+      <label>RVC ONNX <input id="rvc-model" type="file" accept=".onnx,application/octet-stream"></label>
+      <div class="buttons">
+        <button id="load-models" type="button">Load models locally</button>
+        <button id="clear-model-cache" type="button" class="secondary">Clear local model cache</button>
+      </div>
+      <pre id="model-status">No browser models loaded.</pre>
+    </section>
+
+    <section class="card">
+      <h2>Audio path</h2>
+      <p>The first browser milestone runs microphone capture and playback through an AudioWorklet. Where cross-origin isolation is available it uses SharedArrayBuffer ring buffers, otherwise it falls back to message transport.</p>
+      <div class="buttons">
+        <button id="start-audio" type="button">Start local audio path</button>
+        <button id="stop-audio" type="button" class="secondary" disabled>Stop</button>
+      </div>
+      <p id="audio-status" class="status">Audio stopped.</p>
+    </section>
+  </main>
+
+  <footer id="resource-footer">
+    <strong>Hardware pre-flight pending…</strong>
+  </footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
