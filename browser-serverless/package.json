@@ -13,12 +13,12 @@
     "check:dist": "test -f dist/app.js && test -f dist/audio-worklet.js && test -f dist/inference-worker.js && test -f dist/coi-serviceworker.js && ! find dist -type f -name '*.ts' -print -quit | grep -q ."
   },
   "dependencies": {
-    "onnxruntime-web": "^1.23.2"
+    "onnxruntime-web": "1.23.2"
   },
   "devDependencies": {
-    "@types/audioworklet": "^0.0.50",
-    "@types/bun": "^1.3.0",
-    "@webgpu/types": "^0.1.74",
-    "typescript": "^5.9.3"
+    "@types/audioworklet": "0.0.100",
+    "@types/bun": "1.3.0",
+    "@webgpu/types": "0.1.74",
+    "typescript": "5.9.3"
   }
 }
