@@ -54,8 +54,16 @@ export class BrowserOrtRuntime {
     return [...this.sessions.values()].map((value) => value.metadata);
   }
 
+  rvcNeedsPitch(): boolean {
+    const session = this.sessions.get('rvc')?.session;
+    if (!session) return true;
+    const names = new Set(session.inputNames.map((name) => name.toLowerCase()));
+    return names.has('pitch') || names.has('pitchf');
+  }
+
   hasCompleteRvcStack(): boolean {
-    return this.sessions.has('contentvec') && this.sessions.has('rmvpe') && this.sessions.has('rvc');
+    if (!this.sessions.has('contentvec') || !this.sessions.has('rvc')) return false;
+    return !this.rvcNeedsPitch() || this.sessions.has('rmvpe');
   }
 
   close(): void {
