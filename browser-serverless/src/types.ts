@@ -89,8 +89,9 @@ export interface ConversionSettings {
   readonly chunkMilliseconds: number;
 }
 
-export interface InferenceWorkerInit {
+export interface SharedInferenceWorkerInit {
   readonly kind: 'init';
+  readonly transport: 'shared';
   readonly plan: ExecutionPlan;
   readonly inputRing: SharedRingDescriptor;
   readonly outputRing: SharedRingDescriptor;
@@ -98,11 +99,26 @@ export interface InferenceWorkerInit {
   readonly settings: ConversionSettings;
 }
 
+export interface MessageInferenceWorkerInit {
+  readonly kind: 'init';
+  readonly transport: 'message';
+  readonly plan: ExecutionPlan;
+  readonly inputSampleRate: number;
+  readonly settings: ConversionSettings;
+}
+
+export interface InferenceWorkerConvert {
+  readonly kind: 'convert';
+  readonly id: number;
+  readonly audio: Float32Array;
+}
+
 export interface InferenceWorkerStop {
   readonly kind: 'stop';
 }
 
-export type InferenceWorkerRequest = InferenceWorkerInit | InferenceWorkerStop;
+export type InferenceWorkerInit = SharedInferenceWorkerInit | MessageInferenceWorkerInit;
+export type InferenceWorkerRequest = InferenceWorkerInit | InferenceWorkerConvert | InferenceWorkerStop;
 
 export interface InferenceWorkerStatus {
   readonly kind: 'status';
@@ -110,3 +126,13 @@ export interface InferenceWorkerStatus {
   readonly latencyMilliseconds: number | null;
   readonly realtimeFactor: number | null;
 }
+
+export interface InferenceWorkerAudio {
+  readonly kind: 'audio';
+  readonly id: number;
+  readonly audio: Float32Array;
+  readonly latencyMilliseconds: number;
+  readonly realtimeFactor: number;
+}
+
+export type InferenceWorkerResponse = InferenceWorkerStatus | InferenceWorkerAudio;
