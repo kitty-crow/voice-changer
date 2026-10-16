@@ -212,14 +212,19 @@ export const GuiStateProvider = ({ children }: Props) => {
         const storedIsAvailable = inputAudioDeviceInfo.some((device) => device.deviceId === stored);
         const clientInput = typeof setting.voiceChangerClientSetting.audioInput === "string" ? setting.voiceChangerClientSetting.audioInput : "none";
         const clientInputIsAvailable = inputAudioDeviceInfo.some((device) => device.deviceId === clientInput);
-        const preferred = storedIsAvailable ? stored : clientInputIsAvailable ? clientInput : "none";
+        const preferred = stored !== "none" && storedIsAvailable ? stored : clientInputIsAvailable ? clientInput : "none";
 
         storedInputRef.current = preferred;
         setAudioInputForGUI(preferred);
         writeStoredString(AUDIO_INPUT_STORAGE_KEY, preferred);
 
-        if (preferred !== clientInput && preferred !== "file" && preferred !== "screen") {
-            setVoiceChangerClientSetting({ ...setting.voiceChangerClientSetting, audioInput: preferred });
+        // Never reset a working microphone to "none" during preference hydration.
+        // Audio capture changes are still performed by the input selector when
+        // the user explicitly chooses a device.
+        if (preferred !== clientInput && preferred !== "none" && preferred !== "file" && preferred !== "screen") {
+            void setVoiceChangerClientSetting({ ...setting.voiceChangerClientSetting, audioInput: preferred }).catch((error) => {
+                console.warn("[voice-changer] could not restore microphone selection:", error);
+            });
         }
 
         inputPreferenceHydratedRef.current = true;
