@@ -37,6 +37,18 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
         this.setState({ hasError: true });
     }
     handledRejection = (event: PromiseRejectionEvent) => {
+        // Safari may reject an automatic audio-output selection when no user
+        // gesture is active. The default audio output still works, so this
+        // must not replace the entire voice changer UI with an error screen.
+        // Match the actual setSinkId stack to avoid concealing other
+        // NotAllowedError failures (for example, microphone permissions).
+        const reason = event.reason as { name?: string; stack?: string } | null;
+        if (reason?.name === "NotAllowedError" && /setSinkId/i.test(String(reason.stack ?? ""))) {
+            event.preventDefault();
+            console.warn("Audio output selection requires a user gesture; keeping the default output:", event.reason);
+            return;
+        }
+
         const { onError } = this.props;
         const error = new Error(event.type);
         onError(error, null, event.reason);
