@@ -222,9 +222,11 @@ export const GuiStateProvider = ({ children }: Props) => {
         // Audio capture changes are still performed by the input selector when
         // the user explicitly chooses a device.
         if (preferred !== clientInput && preferred !== "none" && preferred !== "file" && preferred !== "screen") {
-            void setVoiceChangerClientSetting({ ...setting.voiceChangerClientSetting, audioInput: preferred }).catch((error) => {
+            try {
+                setVoiceChangerClientSetting({ ...setting.voiceChangerClientSetting, audioInput: preferred });
+            } catch (error) {
                 console.warn("[voice-changer] could not restore microphone selection:", error);
-            });
+            }
         }
 
         inputPreferenceHydratedRef.current = true;
