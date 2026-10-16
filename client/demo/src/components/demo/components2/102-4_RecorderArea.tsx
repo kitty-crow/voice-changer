@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react"
 import { useAppState } from "../../../001_provider/001_AppStateProvider"
 import { useGuiState } from "../001_GuiStateProvider"
 import { AUDIO_ELEMENT_FOR_SAMPLING_INPUT, AUDIO_ELEMENT_FOR_SAMPLING_OUTPUT } from "../../../const"
+import { trySetAudioSink } from "../../../utils/utils"
 
 export type RecorderAreaProps = {
 }
@@ -26,15 +27,13 @@ export const RecorderArea = (_props: RecorderAreaProps) => {
             const wavInput = document.getElementById(AUDIO_ELEMENT_FOR_SAMPLING_INPUT) as HTMLAudioElement
             wavInput.src = "/tmp/in.wav?" + new Date().getTime()
             wavInput.controls = true
-            // @ts-ignore
-            wavInput.setSinkId(audioOutputForAnalyzer)
+            trySetAudioSink(wavInput, audioOutputForAnalyzer)
 
             // set wav (output)
             const wavOutput = document.getElementById(AUDIO_ELEMENT_FOR_SAMPLING_OUTPUT) as HTMLAudioElement
             wavOutput.src = "/tmp/out.wav?" + new Date().getTime()
             wavOutput.controls = true
-            // @ts-ignore
-            wavOutput.setSinkId(audioOutputForAnalyzer)
+            trySetAudioSink(wavOutput, audioOutputForAnalyzer)
         }
 
         const startClassName = serverIORecording ? "config-sub-area-button-active" : "config-sub-area-button"
@@ -64,10 +63,8 @@ export const RecorderArea = (_props: RecorderAreaProps) => {
                                 setAudioOutputForAnalyzer(e.target.value)
                                 const wavInput = document.getElementById(AUDIO_ELEMENT_FOR_SAMPLING_INPUT) as HTMLAudioElement
                                 const wavOutput = document.getElementById(AUDIO_ELEMENT_FOR_SAMPLING_OUTPUT) as HTMLAudioElement
-                                //@ts-ignore
-                                wavInput.setSinkId(e.target.value)
-                                //@ts-ignore
-                                wavOutput.setSinkId(e.target.value)
+                                trySetAudioSink(wavInput, e.target.value)
+                                trySetAudioSink(wavOutput, e.target.value)
                             }}>
                                 {
                                     outputAudioDeviceInfo.map(x => {

@@ -4,6 +4,7 @@ import { fileSelectorAsDataURL, useIndexedDB } from "@dannadori/voice-changer-cl
 import { useGuiState } from "../001_GuiStateProvider";
 import { AUDIO_ELEMENT_FOR_PLAY_MONITOR, AUDIO_ELEMENT_FOR_PLAY_RESULT, AUDIO_ELEMENT_FOR_TEST_CONVERTED, AUDIO_ELEMENT_FOR_TEST_CONVERTED_ECHOBACK, AUDIO_ELEMENT_FOR_TEST_ORIGINAL, INDEXEDDB_KEY_AUDIO_MONITR, INDEXEDDB_KEY_AUDIO_OUTPUT } from "../../../const";
 import { isDesktopApp } from "../../../const";
+import { trySetAudioSink } from "../../../utils/utils";
 
 export type DeviceAreaProps = {};
 
@@ -389,8 +390,7 @@ export const DeviceArea = (_props: DeviceAreaProps) => {
                         // Server Audio を使う場合はElementから音は出さない。
                         audio.volume = 0;
                     } else if (audioOutputForGUI == "none") {
-                        // @ts-ignore
-                        audio.setSinkId("");
+                        trySetAudioSink(audio, "");
                         if (x == AUDIO_ELEMENT_FOR_TEST_CONVERTED_ECHOBACK) {
                             audio.volume = 0;
                         } else {
@@ -404,8 +404,7 @@ export const DeviceArea = (_props: DeviceAreaProps) => {
                             return x.deviceId == audioOutputForGUI;
                         });
                         if (found) {
-                            // @ts-ignore // 例外キャッチできないので事前にIDチェックが必要らしい。！？
-                            audio.setSinkId(audioOutputForGUI);
+                            trySetAudioSink(audio, audioOutputForGUI);
                         } else {
                             console.warn("No audio output device. use default");
                         }
@@ -436,8 +435,13 @@ export const DeviceArea = (_props: DeviceAreaProps) => {
                         className="body-select"
                         value={audioOutputForGUI}
                         onChange={(e) => {
-                            setAudioOutputForGUI(e.target.value);
-                            setItem(INDEXEDDB_KEY_AUDIO_OUTPUT, e.target.value);
+                            const deviceId = e.target.value;
+                            setAudioOutputForGUI(deviceId);
+                            setItem(INDEXEDDB_KEY_AUDIO_OUTPUT, deviceId);
+                            // Select the sink directly from the user gesture (required by Safari).
+                            [AUDIO_ELEMENT_FOR_PLAY_RESULT, AUDIO_ELEMENT_FOR_TEST_CONVERTED_ECHOBACK].forEach((id) => {
+                                trySetAudioSink(document.getElementById(id) as HTMLAudioElement | null, deviceId === "none" ? "" : deviceId);
+                            });
                         }}
                     >
                         {outputAudioDeviceInfo.map((x) => {
@@ -620,8 +624,7 @@ export const DeviceArea = (_props: DeviceAreaProps) => {
                         // Server Audio を使う場合はElementから音は出さない。
                         audio.volume = 0;
                     } else if (audioMonitorForGUI == "none") {
-                        // @ts-ignore
-                        audio.setSinkId("");
+                        trySetAudioSink(audio, "");
                         audio.volume = 0;
                     } else {
                         const audioOutputs = mediaDeviceInfos.filter((x) => {
@@ -631,8 +634,7 @@ export const DeviceArea = (_props: DeviceAreaProps) => {
                             return x.deviceId == audioMonitorForGUI;
                         });
                         if (found) {
-                            // @ts-ignore // 例外キャッチできないので事前にIDチェックが必要らしい。！？
-                            audio.setSinkId(audioMonitorForGUI);
+                            trySetAudioSink(audio, audioMonitorForGUI);
                             audio.volume = 1;
                         } else {
                             console.warn("No audio output device. use default");
@@ -658,8 +660,11 @@ export const DeviceArea = (_props: DeviceAreaProps) => {
                         className="body-select"
                         value={audioMonitorForGUI}
                         onChange={(e) => {
-                            setAudioMonitorForGUI(e.target.value);
-                            setItem(INDEXEDDB_KEY_AUDIO_MONITR, e.target.value);
+                            const deviceId = e.target.value;
+                            setAudioMonitorForGUI(deviceId);
+                            setItem(INDEXEDDB_KEY_AUDIO_MONITR, deviceId);
+                            // Keep the output-device request inside the user gesture.
+                            trySetAudioSink(document.getElementById(AUDIO_ELEMENT_FOR_PLAY_MONITOR) as HTMLAudioElement | null, deviceId === "none" ? "" : deviceId);
                         }}
                     >
                         {outputAudioDeviceInfo.map((x) => {
