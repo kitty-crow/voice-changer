@@ -1,0 +1,334 @@
+.dialog-container,
+.dialog-container2 {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--vc-bg-deep) 58%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.dialog-container .dialog-frame,
+.dialog-container2 .dialog-frame {
+    width: min(920px, 100%);
+    max-width: 100%;
+    max-height: min(88dvh, 900px);
+    border: 1px solid var(--vc-line);
+    border-radius: 22px;
+    background: var(--vc-surface);
+    color: var(--vc-ink);
+    box-shadow: var(--vc-shadow);
+    overflow: hidden;
+}
+
+.dialog-container .dialog-frame .dialog-title,
+.dialog-container2 .dialog-frame .dialog-title {
+    width: 100%;
+    margin: 0;
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--vc-line);
+    background:
+        linear-gradient(90deg, color-mix(in srgb, var(--vc-accent-soft) 72%, var(--vc-surface)), color-mix(in srgb, var(--vc-accent-2-soft) 52%, var(--vc-surface)));
+    color: var(--vc-ink);
+    font-size: 0.92rem;
+    font-weight: 820;
+    letter-spacing: -0.01em;
+    text-align: left;
+}
+
+.dialog-container .dialog-frame .dialog-content,
+.dialog-container2 .dialog-frame .dialog-content,
+.dialog-container .dialog-frame .dialog-fixed-size-content,
+.dialog-container2 .dialog-frame .dialog-fixed-size-content {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(88dvh - 54px);
+    padding: 16px 18px 18px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.dialog-container .dialog-frame .dialog-content .dialog-application-title,
+.dialog-container2 .dialog-frame .dialog-content .dialog-application-title {
+    color: var(--vc-ink);
+    font-family: var(--vc-font);
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+    font-weight: 850;
+    letter-spacing: -0.04em;
+}
+
+.dialog-container .dialog-fixed-size-content .model-slot-container,
+.dialog-container2 .dialog-fixed-size-content .model-slot-container {
+    width: 100%;
+    max-height: min(62dvh, 620px);
+    padding-right: 4px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.dialog-container .model-slot-container .model-slot,
+.dialog-container2 .model-slot-container .model-slot {
+    width: 100%;
+    min-width: 0;
+    min-height: 94px;
+    height: auto;
+    padding: 9px 0;
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr) 88px;
+    gap: 10px;
+    align-items: stretch;
+    border-bottom: 1px solid var(--vc-line);
+}
+
+.dialog-container .model-slot-container .model-slot:last-child,
+.dialog-container2 .model-slot-container .model-slot:last-child {
+    border-bottom: 0;
+}
+
+.dialog-container .model-slot .model-slot-icon,
+.dialog-container .model-slot .model-slot-icon-pointable,
+.dialog-container2 .model-slot .model-slot-icon,
+.dialog-container2 .model-slot .model-slot-icon-pointable {
+    width: 76px;
+    height: 76px;
+    border: 1px solid var(--vc-line);
+    border-radius: 13px;
+    background: var(--vc-surface-soft);
+    object-fit: contain;
+}
+
+.dialog-container .model-slot .model-slot-detail,
+.dialog-container2 .model-slot .model-slot-detail {
+    width: auto;
+    min-width: 0;
+    max-height: 112px;
+    padding: 4px 8px;
+    overflow: auto;
+    border: 1px solid var(--vc-line);
+    border-radius: 10px;
+    background: var(--vc-surface-soft);
+    color: var(--vc-ink);
+    font-size: 0.7rem;
+}
+
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(62px, 0.35fr) minmax(0, 1fr) auto;
+    gap: 6px;
+    align-items: center;
+}
+
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row-label,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row-label {
+    width: auto;
+    color: var(--vc-muted);
+    white-space: nowrap;
+}
+
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row-value,
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row-value-download,
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row-value-pointable,
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row-value-edit,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row-value,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row-value-download,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row-value-pointable,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row-value-edit {
+    width: auto;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--vc-ink);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row-value-download,
+.dialog-container .model-slot .model-slot-detail .model-slot-detail-row-value-pointable,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row-value-download,
+.dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row-value-pointable {
+    color: var(--vc-accent);
+    cursor: pointer;
+}
+
+.dialog-container .model-slot .model-slot-buttons,
+.dialog-container2 .model-slot .model-slot-buttons {
+    width: auto;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    border-bottom: 0;
+}
+
+.dialog-container .model-slot .model-slot-button,
+.dialog-container .model-slot .model-slot-button-disabled,
+.dialog-container .model-slot .model-slot-button-active,
+.dialog-container .model-slot .model-slot-button-stanby,
+.dialog-container2 .model-slot .model-slot-button,
+.dialog-container2 .model-slot .model-slot-button-disabled,
+.dialog-container2 .model-slot .model-slot-button-active,
+.dialog-container2 .model-slot .model-slot-button-stanby {
+    width: 100%;
+    min-height: 27px;
+    padding: 4px 7px;
+    border: 1px solid var(--vc-line);
+    border-radius: 8px;
+    background: var(--vc-surface-raised);
+    color: var(--vc-ink);
+    font-size: 0.67rem;
+    line-height: 1;
+    text-align: center;
+}
+
+.dialog-container .model-slot .model-slot-button,
+.dialog-container .model-slot .model-slot-button-stanby,
+.dialog-container2 .model-slot .model-slot-button,
+.dialog-container2 .model-slot .model-slot-button-stanby {
+    cursor: pointer;
+}
+
+.dialog-container .model-slot .model-slot-button:hover,
+.dialog-container .model-slot .model-slot-button-stanby:hover,
+.dialog-container2 .model-slot .model-slot-button:hover,
+.dialog-container2 .model-slot .model-slot-button-stanby:hover {
+    border-color: color-mix(in srgb, var(--vc-accent) 50%, var(--vc-line));
+    color: var(--vc-accent);
+}
+
+.dialog-container .model-slot .model-slot-button-active,
+.dialog-container2 .model-slot .model-slot-button-active {
+    border-color: color-mix(in srgb, var(--vc-success) 42%, var(--vc-line));
+    background: var(--vc-success-soft);
+    color: var(--vc-success);
+}
+
+.dialog-container .file-uploader-header,
+.dialog-container .model-slot-header,
+.dialog-container2 .file-uploader-header,
+.dialog-container2 .model-slot-header {
+    margin: 0 0 10px;
+    color: var(--vc-ink);
+    font-weight: 800;
+}
+
+.dialog-container .file-uploader-header-button,
+.dialog-container .model-slot-header-button,
+.dialog-container2 .file-uploader-header-button,
+.dialog-container2 .model-slot-header-button {
+    min-height: 30px;
+    padding: 5px 9px;
+    border: 1px solid var(--vc-line);
+    border-radius: 8px;
+    background: var(--vc-surface-raised);
+    color: var(--vc-ink);
+}
+
+.dialog-container .file-uploader-file-select-container,
+.dialog-container2 .file-uploader-file-select-container {
+    padding-left: 0;
+}
+
+.dialog-container .file-uploader-file-select-row,
+.dialog-container2 .file-uploader-file-select-row {
+    min-width: 0;
+    padding: 7px 0;
+    display: grid;
+    grid-template-columns: minmax(100px, 0.45fr) minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    border-bottom: 1px solid color-mix(in srgb, var(--vc-line) 72%, transparent);
+}
+
+.dialog-container .file-uploader-file-select-row-label,
+.dialog-container .file-uploader-file-select-row-value,
+.dialog-container2 .file-uploader-file-select-row-label,
+.dialog-container2 .file-uploader-file-select-row-value {
+    width: auto;
+    min-width: 0;
+}
+
+.dialog-container .file-uploader-file-select-row-value,
+.dialog-container2 .file-uploader-file-select-row-value {
+    overflow: hidden;
+    color: var(--vc-danger);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dialog-container .file-uploader-file-select-row-button,
+.dialog-container .file-uploader-file-select-upload-button,
+.dialog-container2 .file-uploader-file-select-row-button,
+.dialog-container2 .file-uploader-file-select-upload-button {
+    min-height: 30px;
+    padding: 5px 9px;
+    border: 1px solid var(--vc-line);
+    border-radius: 8px;
+    background: var(--vc-surface-raised);
+    color: var(--vc-ink);
+    cursor: pointer;
+}
+
+.dialog-container .edit-model-slot-row,
+.dialog-container2 .edit-model-slot-row {
+    min-width: 0;
+    display: flex;
+    flex-flow: row wrap;
+    gap: 8px;
+}
+
+.dialog-container .edit-model-slot-speakers,
+.dialog-container2 .edit-model-slot-speakers {
+    min-width: 0;
+    margin-left: 0;
+    flex-flow: row wrap;
+}
+
+.dialog-container .input-text-container,
+.dialog-container2 .input-text-container {
+    margin: 12px 0;
+    gap: 8px;
+}
+
+.dialog-container input,
+.dialog-container select,
+.dialog-container textarea,
+.dialog-container2 input,
+.dialog-container2 select,
+.dialog-container2 textarea {
+    max-width: 100%;
+}
+
+.tooltip-text {
+    z-index: 500;
+    border: 1px solid var(--vc-line-strong);
+    background: var(--vc-ink);
+    color: var(--vc-bg);
+    box-shadow: var(--vc-shadow-soft);
+}
+
+.error-container {
+    width: min(900px, calc(100% - 32px));
+    margin: 32px auto;
+    padding: 20px;
+    border: 1px solid var(--vc-line);
+    border-radius: 18px;
+    background: var(--vc-surface);
+    color: var(--vc-ink);
+    box-shadow: var(--vc-shadow);
+}
+
+.error-container button {
+    min-height: 34px;
+    padding: 6px 10px;
+    border: 1px solid var(--vc-line);
+    border-radius: 9px;
+    background: var(--vc-surface-raised);
+    color: var(--vc-ink);
+    cursor: pointer;
+}

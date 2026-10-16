@@ -7,6 +7,7 @@ import { fab } from "@fortawesome/free-brands-svg-icons";
 import { ErrorInfo, useEffect, useMemo, useState } from "react";
 
 import "./css/App.css";
+import "./css/Modern.css";
 import ErrorBoundary from "./001_provider/900_ErrorBoundary";
 import { AppStateProvider } from "./001_provider/001_AppStateProvider";
 import { AppRootProvider, useAppRoot } from "./001_provider/001_AppRootProvider";
@@ -35,7 +36,6 @@ const App = () => {
 const AppStateWrapper = () => {
     const { appGuiSettingState, getGUISetting } = useAppRoot();
     const messageBuilderState = useMessageBuilder();
-    // エラーメッセージ登録
     useMemo(() => {
         messageBuilderState.setMessage(__filename, "Problem", { ja: "ちょっと問題が起きたみたいです。", en: "Looks like there's a bit of a problem." });
         messageBuilderState.setMessage(__filename, "Problem-sub1", { ja: "このアプリで管理している情報をクリアすると回復する場合があります。", en: "" });
@@ -44,7 +44,6 @@ const AppStateWrapper = () => {
         messageBuilderState.setMessage(__filename, "Problem-action2", { ja: "初期化せずリロード", en: "Reload without initialize" });
     }, []);
 
-    // エラーバウンダリー設定
     const [error, setError] = useState<{ error: Error; errorInfo: ErrorInfo | null; reason: any }>();
     const { removeDB } = useIndexedDB({ clientType: null });
 
@@ -117,7 +116,15 @@ const AppStateWrapper = () => {
     }, []);
 
     if (!appGuiSettingState.guiSettingLoaded) {
-        return <>loading...</>;
+        return (
+            <div className="vc-boot" role="status" aria-live="polite">
+                <div className="vc-boot__mark" aria-hidden="true">≈</div>
+                <div>
+                    <strong>Voice Changer</strong>
+                    <span>Loading interface…</span>
+                </div>
+            </div>
+        );
     } else {
         return (
             <ErrorBoundary fallback={errorComponent} onError={updateError}>

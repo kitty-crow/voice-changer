@@ -11,6 +11,9 @@ torchaudio==2.0.2
 resampy==0.4.2
 python-socketio==5.8.0
 fastapi==0.95.1
+# Starlette 0.26.x uses anyio.to_thread.run_sync. Pin AnyIO 3.x so
+# historical installs cannot silently resolve to an incompatible 2.x build.
+anyio==3.7.1
 python-multipart==0.0.6
 onnxruntime-gpu==1.13.1
 pyworld==0.3.3

@@ -1,0 +1,326 @@
+@media (max-width: 1100px) {
+    .character-area {
+        grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
+    }
+
+    .character-area .character-area-control-area {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .character-area .character-area-control-area .character-area-control:first-child {
+        grid-column: auto;
+    }
+
+    .config-area {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .vc-section-heading {
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+}
+
+@media (max-width: 820px) {
+    body,
+    #app,
+    .vc-app-shell.main-body {
+        min-height: 100dvh;
+    }
+
+    .vc-header-region,
+    .vc-main,
+    .vc-footer {
+        width: calc(100% - 24px);
+    }
+
+    .vc-header-region {
+        padding-top: 8px;
+    }
+
+    .vc-site-header.headerArea {
+        min-height: 0;
+        padding: 10px 11px;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    .vc-site-header.headerArea .title1.vc-brand-lockup {
+        width: 100%;
+    }
+
+    .vc-site-header.headerArea .icons.vc-header-actions {
+        width: 100%;
+        margin-left: 0;
+        justify-content: space-between;
+    }
+
+    .vc-site-header.headerArea .icons .belongings {
+        flex-wrap: wrap;
+    }
+
+    .vc-main {
+        padding-block: 12px 30px;
+    }
+
+    .vc-section-heading {
+        padding: 17px 18px 13px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 7px;
+        align-items: start;
+    }
+
+    .vc-section-description {
+        justify-self: start;
+        text-align: left;
+    }
+
+    .vc-section-body {
+        padding: 15px 16px 18px;
+    }
+
+    .character-area {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .character-area .portrait-area {
+        width: min(270px, 100%);
+        margin-inline: auto;
+    }
+
+    .model-slot-area .model-slot-panel {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .model-slot-area .model-slot-panel .model-slot-buttons {
+        width: 100%;
+        min-width: 0;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-buttons {
+        flex-direction: row;
+    }
+
+    .model-slot-area .model-slot-panel .model-slot-buttons .model-slot-button,
+    .model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-button,
+    .model-slot-area .model-slot-panel .model-slot-buttons .model-slot-sort-button-active {
+        width: auto;
+        min-width: 44px;
+    }
+
+    .model-slot-area .model-slot-panel .model-slot-buttons .model-slot-button {
+        margin-left: auto;
+        padding-inline: 14px;
+    }
+
+    .config-area .config-sub-area .config-sub-area-control {
+        grid-template-columns: minmax(68px, 0.45fr) minmax(0, 1.55fr);
+    }
+
+    .dialog-container,
+    .dialog-container2 {
+        height: 100dvh;
+        padding: 12px;
+    }
+
+    .dialog-container .dialog-frame,
+    .dialog-container2 .dialog-frame {
+        max-height: calc(100dvh - 24px);
+    }
+
+    .dialog-container .model-slot-container .model-slot,
+    .dialog-container2 .model-slot-container .model-slot {
+        grid-template-columns: 66px minmax(0, 1fr);
+    }
+
+    .dialog-container .model-slot .model-slot-icon,
+    .dialog-container .model-slot .model-slot-icon-pointable,
+    .dialog-container2 .model-slot .model-slot-icon,
+    .dialog-container2 .model-slot .model-slot-icon-pointable {
+        width: 66px;
+        height: 66px;
+    }
+
+    .dialog-container .model-slot .model-slot-buttons,
+    .dialog-container2 .model-slot .model-slot-buttons {
+        grid-column: 1 / -1;
+        flex-direction: row;
+    }
+
+    .dialog-container .model-slot .model-slot-button,
+    .dialog-container .model-slot .model-slot-button-disabled,
+    .dialog-container .model-slot .model-slot-button-active,
+    .dialog-container .model-slot .model-slot-button-stanby,
+    .dialog-container2 .model-slot .model-slot-button,
+    .dialog-container2 .model-slot .model-slot-button-disabled,
+    .dialog-container2 .model-slot .model-slot-button-active,
+    .dialog-container2 .model-slot .model-slot-button-stanby {
+        flex: 1 1 0;
+    }
+}
+
+@media (max-width: 560px) {
+    body,
+    #app,
+    .vc-app-shell.main-body {
+        min-height: 100dvh;
+    }
+
+    .vc-header-region,
+    .vc-main,
+    .vc-footer {
+        width: calc(100% - 16px);
+    }
+
+    .vc-site-header.headerArea {
+        border-radius: 15px;
+    }
+
+    .vc-site-header.headerArea .title1 .title {
+        width: 100%;
+        font-size: 1.05rem;
+    }
+
+    .vc-site-header.headerArea .icons.vc-header-actions {
+        align-items: flex-start;
+        gap: 7px;
+    }
+
+    .vc-site-header .vc-donation-button {
+        min-width: 66px;
+    }
+
+    .vc-site-header .vc-donation-button .donate-img {
+        max-width: 68px;
+    }
+
+    .vc-site-header .vc-theme-toggle,
+    .vc-site-header.headerArea .icons .belongings .belongings-button.vc-clear-button {
+        min-height: 34px;
+        height: 34px;
+        padding-inline: 8px;
+        font-size: 0.68rem;
+    }
+
+    .vc-section {
+        border-radius: 18px;
+    }
+
+    .vc-section-heading {
+        padding: 15px 14px 12px;
+    }
+
+    .vc-section-body {
+        padding: 12px 12px 15px;
+    }
+
+    .model-slot-area .model-slot-panel .model-slot-tiles-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-height: min(42dvh, 360px);
+        gap: 8px;
+    }
+
+    .model-slot-tile-container,
+    .model-slot-tile-container-selected {
+        height: 108px;
+    }
+
+    .model-slot-tile-icon-div,
+    .model-slot-tile-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .character-area .portrait-area {
+        width: min(240px, 100%);
+    }
+
+    .character-area .character-area-control-area .character-area-control {
+        min-height: 0;
+        padding: 9px 10px;
+        grid-template-columns: minmax(52px, auto) minmax(0, 1fr);
+    }
+
+    .character-area .character-area-control-buttons {
+        gap: 6px;
+    }
+
+    .character-area .character-area-control-buttons .character-area-control-button-active,
+    .character-area .character-area-control-buttons .character-area-control-button-stanby,
+    .character-area .character-area-control-buttons .character-area-control-passthru-button-stanby,
+    .character-area .character-area-control-buttons .character-area-control-passthru-button-active {
+        min-height: 36px;
+        padding-inline: 5px;
+        font-size: 0.7rem;
+    }
+
+    .config-area .config-sub-area {
+        padding-inline: 10px;
+    }
+
+    .config-area .config-sub-area .config-sub-area-control,
+    .advanced-setting-container .advanced-setting-container-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 5px;
+        align-items: start;
+    }
+
+    .config-area .config-sub-area .config-sub-area-control-title,
+    .config-area .config-sub-area .config-sub-area-control-title-long {
+        grid-column: auto;
+    }
+
+    .config-sub-area-control-field-auido-io-filter {
+        max-width: 100%;
+        flex-basis: 100%;
+    }
+
+    .dialog-container,
+    .dialog-container2 {
+        padding: 8px;
+    }
+
+    .dialog-container .dialog-frame,
+    .dialog-container2 .dialog-frame {
+        max-height: calc(100dvh - 16px);
+        border-radius: 17px;
+    }
+
+    .dialog-container .dialog-frame .dialog-content,
+    .dialog-container2 .dialog-frame .dialog-content,
+    .dialog-container .dialog-frame .dialog-fixed-size-content,
+    .dialog-container2 .dialog-frame .dialog-fixed-size-content {
+        padding: 12px;
+    }
+
+    .dialog-container .model-slot-container .model-slot,
+    .dialog-container2 .model-slot-container .model-slot {
+        grid-template-columns: 56px minmax(0, 1fr);
+        gap: 7px;
+    }
+
+    .dialog-container .model-slot .model-slot-icon,
+    .dialog-container .model-slot .model-slot-icon-pointable,
+    .dialog-container2 .model-slot .model-slot-icon,
+    .dialog-container2 .model-slot .model-slot-icon-pointable {
+        width: 56px;
+        height: 56px;
+    }
+
+    .dialog-container .model-slot .model-slot-detail .model-slot-detail-row,
+    .dialog-container2 .model-slot .model-slot-detail .model-slot-detail-row,
+    .dialog-container .file-uploader-file-select-row,
+    .dialog-container2 .file-uploader-file-select-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2px;
+    }
+
+    .vc-footer {
+        padding-bottom: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 5px;
+    }
+}

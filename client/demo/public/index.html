@@ -1,10 +1,32 @@
-<!DOCTYPE html>
-<html style="width: 100%; height: 100%; overflow: hidden">
+<!doctype html>
+<html lang="en-GB">
     <head>
         <meta charset="utf-8" />
-        <title>Voice Changer Client Demo</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="description" content="A responsive real-time voice conversion control surface." />
+        <meta name="theme-color" content="#0a1020" />
+        <meta name="color-scheme" content="light dark" />
+        <meta name="application-name" content="Voice Changer" />
+        <title>Voice Changer</title>
+        <link rel="icon" href="favicon.ico" />
+        <script>
+            (() => {
+                const key = "voice-changer.theme";
+                let theme = "";
+                try {
+                    theme = localStorage.getItem(key) || "";
+                } catch (_) {}
+                if (theme !== "light" && theme !== "dark") {
+                    theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                }
+                document.documentElement.dataset.theme = theme;
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute("content", theme === "dark" ? "#0a1020" : "#edf2f8");
+            })();
+        </script>
     </head>
-    <body style="width: 100%; height: 100%; margin: 0px">
-        <div id="app" style="width: 100%; height: 100%"></div>
+    <body>
+        <div id="app"></div>
+        <noscript>This interface requires JavaScript.</noscript>
     </body>
 </html>
